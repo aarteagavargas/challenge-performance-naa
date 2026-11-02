@@ -9,8 +9,6 @@
 5. **Prueba de saturación/ruptura:** aumentar progresivamente usuarios, ventas o requests por segundo hasta que el sistema comience a fallar o deje de cumplir los objetivos de rendimiento. Permite identificar el límite máximo y establecer una capacidad operativa segura por debajo del punto de ruptura. Debe ejecutarse en un entorno de prueba autorizado y registrar cómo aparecen los errores y cómo responde el autoscaling.
 6. **Prueba de recuperación:** generar primero una carga superior a lo normal y luego volver a una carga estable. Permite verificar si el sistema recupera su rendimiento sin reinicios manuales, mantiene conexiones válidas y elimina gradualmente la carga acumulada. También puede evaluar el funcionamiento del autoscaling al reducir y volver a aumentar la demanda.
 
-Para cada prueba conviene medir disponibilidad, porcentaje de errores, tiempo de respuesta P95/P99, TPS sostenido, throughput, CPU, memoria, conexiones, tiempo de cola, uso de base de datos y comportamiento del autoscaling. El P95 representa el tiempo por debajo del cual respondió el 95% de las solicitudes.
-
 ## Parte 2 — Alcance ejecutado
 
 Endpoint: `POST https://dummyjson.com/products/add`
@@ -23,8 +21,6 @@ Criterios de aceptación definidos:
 - Menos del 5% de requests fallidas.
 - p95 menor a 1 segundo.
 - Más del 95% de validaciones exitosas.
-
-Nota: El endpoint público DummyJSON aplica protección por límite de solicitudes y puede responder 429 cuando se supera su cuota. Por ello, los resultados representan la capacidad del servicio externo observado, no la infraestructura propia de una aplicación de e-commerce.
 
 ## Autenticación y datos únicos
 

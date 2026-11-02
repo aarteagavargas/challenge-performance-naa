@@ -1,5 +1,6 @@
 import http from 'k6/http';
 import { check } from 'k6';
+import { bearerHeaders, login } from './utils/auth.js';
 
 const rate = Number(__ENV.TPS || 50);
 
@@ -22,22 +23,8 @@ export const options = {
 };
 
 export function setup() {
-  const loginResponse = http.post(
-    'https://dummyjson.com/auth/login',
-    JSON.stringify({ username: 'emilys', password: 'emilyspass' }),
-    { headers: { 'Content-Type': 'application/json' }, tags: { operation: 'login' } },
-  );
-
-  check(loginResponse, {
-    'login returned HTTP 200': (response) => response.status === 200,
-  });
-
-  if (loginResponse.status !== 200) {
-    throw new Error(`Login failed with HTTP ${loginResponse.status}: ${loginResponse.body}`);
-  }
-
-  const loginData = loginResponse.json();
-  return { token: loginData.accessToken };
+  const token = login();
+  return { token };
 }
 
 export default function (auth) {
@@ -47,10 +34,7 @@ export default function (auth) {
   });
 
   const response = http.post('https://dummyjson.com/products/add', payload, {
-    headers: {
-      Authorization: `Bearer ${auth.token}`,
-      'Content-Type': 'application/json',
-    },
+    headers: bearerHeaders(auth.token),
     tags: { endpoint: 'add_product', operation: 'create_product', tps: String(rate) },
   });
 

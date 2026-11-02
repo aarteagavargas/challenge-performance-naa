@@ -58,3 +58,7 @@ k6 run -e TPS=100 --summary-export reports/100-tps-summary.json tests/products-a
 ```
 
 La prueba crea 50 o 100 requests por segundo durante 60 segundos, con un margin de VUs automáticos para absorber variaciones.
+
+## Author
+
+Neila Alejandra Arteaga Vargas

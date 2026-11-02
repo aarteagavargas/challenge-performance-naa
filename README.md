@@ -2,13 +2,15 @@
 
 ## Parte 1 — Pruebas recomendadas
 
-1. **Prueba de carga normal:** 1.500 ventas/día equivalen a aproximadamente 0.017 ventas por segundo promedio. Dado que las ventas generan varios servicios por operación, una simulación basada en el flujo completo debe calibrarse con la mezcla real de requests por pedido.
-2. **Prueba de pico estacional:** Multiplicar por cinco la carga normal (≈7.500 ventas/día), considerando concentraciones horarias y picos superiores al promedio.
-3. **Prueba de estrés:** Incrementar gradualmente la carga hasta 100–150% por encima del pico esperado para identificar el punto de degradación y saturación.
-4. **Prueba de resistencia:** Mantener la carga normal o de pico durante varias horas para detectar fugas de memoria, crecimiento de conexiones o degradación acumulativa.
-5. **Prueba de saturación/ruptura:** Aumentar la tasa hasta observar fallos, registrar capacidad máxima, tiempos de recuperación y comportamiento del autoscaling.
+1. **Prueba de carga normal:** simular el promedio de 1.500 ventas por día. Conviene distribuirlas por hora según el patrón real del e-commerce, ya que la carga no es constante durante las 24 horas.
+2. **Prueba de pico estacional:** simular aproximadamente 7.500 ventas por día, multiplicando por cinco la carga normal. Debe reproducir las concentraciones y los picos de horas críticas en eventos como Black Friday o Navidad.
+3. **Prueba de estrés:** incrementar gradualmente la carga hasta superar el pico estacional esperado, por ejemplo entre 100% y 150%. Permite identificar el punto de degradación, la saturación y el comportamiento ante demanda anormal.
+4. **Prueba de resistencia:** mantener la carga normal durante varias horas o la carga de pico durante un período prolongado. Permite detectar fugas de memoria, crecimiento de conexiones, saturación de recursos y degradación acumulativa.
+5. **Prueba de saturación o ruptura:** aumentar progresivamente usuarios, ventas o requests por segundo hasta que el sistema comience a fallar. Permite identificar el límite máximo, registrar cómo aparecen los errores y establecer una capacidad operativa segura por debajo del punto de ruptura. Debe ejecutarse en un entorno de prueba autorizado.
+6. **Prueba de capacidad máxima:** repetir cargas crecientes hasta determinar cuántas transacciones por segundo admite el sistema antes de superar los objetivos de tiempo, disponibilidad y errores. El resultado sirve como referencia para dimensionamiento, escalado y planificación de eventos especiales.
+7. **Prueba de recuperación:** generar primero una carga superior a lo normal y luego volver a una carga estable. Permite verificar si el sistema recupera su rendimiento sin reinicios manuales, mantiene conexiones válidas y elimina gradualmente la carga acumulada. También puede evaluar el funcionamiento del autoscaling al reducir y volver a aumentar la demanda.
 
-Para cada prueba conviene medir disponibilidad, porcentaje de errores, p95/p99 de duración, TPS sostenido, throughput, CPU, memoria, conexiones, cola de base de datos y autoscaling.
+Para cada prueba conviene medir disponibilidad, porcentaje de errores, tiempo de respuesta P95/P99, TPS sostenido, throughput, CPU, memoria, conexiones, tiempo de cola, uso de base de datos y comportamiento del autoscaling. El P95 representa el tiempo por debajo del cual respondió el 95% de las solicitudes.
 
 ## Parte 2 — Alcance ejecutado
 
@@ -53,11 +55,11 @@ El título combina la carga objetivo, VU, iteración, tiempo y valor aleatorio. 
 ## Ejecución
 
 ```bash
-k6 run -e TPS=50 --summary-export reports/50-tps-summary.json tests/products-add-load.js
-k6 run -e TPS=100 --summary-export reports/100-tps-summary.json tests/products-add-load.js
+k6 run -e TPS=50 --summary-export reports/50-tps-auth-summary.json tests/products-add-load.js
+k6 run -e TPS=100 --summary-export reports/100-tps-auth-summary.json tests/products-add-load.js
 ```
 
-La prueba crea 50 o 100 requests por segundo durante 60 segundos, con un margin de VUs automáticos para absorber variaciones.
+Cada prueba crea 50 o 100 requests por segundo durante 60 segundos, con el margen de VUs configurado automáticamente para absorber variaciones.
 
 ## Author
 

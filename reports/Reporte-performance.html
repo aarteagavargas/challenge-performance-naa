@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="es">
+<head><meta charset="utf-8"><title>Reporte ejecutivo — Prueba de performance</title>
+<style>
+body{font-family:Arial,sans-serif;color:#243447;margin:40px;line-height:1.45;max-width:1100px}h1{color:#135e8c;border-bottom:3px solid #38a3a5;padding-bottom:10px}h2{color:#135e8c;margin-top:28px}.cards{display:flex;gap:16px}.card{flex:1;border-radius:10px;padding:18px;background:#edf6f7;border-left:7px solid #38a3a5}.bad{background:#fff1ef;border-left-color:#d64541}.metric{font-size:28px;font-weight:bold}.status{font-weight:bold;color:#d64541}table{border-collapse:collapse;width:100%;margin-top:12px}th,td{border:1px solid #ccd6dc;padding:10px;text-align:left}th{background:#135e8c;color:white}.ok{color:#25855a}.foot{font-size:13px;color:#667782;margin-top:30px}
+</style></head>
+<body>
+<h1>Prueba de performance de la API de creación de productos</h1>
+<p><b>Objetivo:</b> Comprender qué ocurre al enviar 50 y 100 solicitudes de creación de productos por segundo durante un minuto.</p>
+<p><b>Fecha:</b> 2 de noviembre de 2026 &nbsp; | &nbsp; <b>Herramienta:</b> k6 &nbsp; | &nbsp; <b>Servicio evaluado:</b> dummyjson.com</p>
+
+<p><b>Preparación autenticada:</b> el script inició sesión una vez, obtuvo el JWT mediante `POST /auth/login` y lo envió como Bearer token. Cada request creó además un `title` diferente.</p>
+
+<h2>Resumen ejecutivo</h2>
+<div class="cards">
+<div class="card"><b>50 solicitudes por segundo</b><div class="metric">54,53% fallos</div><p>Tiempo medio: 160 ms<br>Tiempo p95: 165 ms<br>Solicitudes procesadas: 3.002</p></div>
+<div class="card bad"><b>100 solicitudes por segundo</b><div class="metric">76,78% fallos</div><p>Tiempo medio: 161 ms<br>Tiempo p95: 163 ms<br>Solicitudes procesadas: 5.991</p></div>
+</div>
+<p><span class="status">Resultado: no aprobado.</span> El login fue exitoso y los títulos fueron únicos. Sin embargo, el servicio rechazó una proporción alta de solicitudes tanto a 50 como a 100 TPS. El p95 permaneció por debajo de 1 segundo, pero las tasas de error excedieron ampliamente el objetivo.</p>
+
+<h2>Resultados comparados</h2>
+<table>
+<tr><th>Indicador</th><th>50 TPS</th><th>100 TPS</th><th>Lectura ejecutiva</th></tr>
+<tr><td>Autenticación</td><td>Login exitoso</td><td>Login exitoso</td><td>JWT obtenido antes de la carga</td></tr>
+<tr><td>Solicitudes por segundo obtenidas</td><td>49,67</td><td>99,06</td><td>Ambas tasas llegaron cerca del objetivo</td></tr>
+<tr><td>Solicitudes procesadas</td><td>3.002</td><td>5.991</td><td>Se duplicó el volumen</td></tr>
+<tr><td>Tasa de solicitudes fallidas</td><td>54,53%</td><td>76,78%</td><td>Empeora al duplicar la carga</td></tr>
+<tr><td>Tiempo medio de respuesta</td><td>160,14 ms</td><td>160,73 ms</td><td>Sin aumento notable</td></tr>
+<tr><td>Tiempo p95</td><td>165,27 ms</td><td>162,99 ms</td><td>Dentro del objetivo de 1 segundo</td></tr>
+<tr><td>Validaciones exitosas</td><td>45,46%</td><td>23,21%</td><td>No alcanzan el 95% esperado</td></tr>
+</table>
+
+<h2>Conclusiones</h2>
+<ul>
+<li>La generación del JWT y la autenticación funcionaron correctamente.</li>
+<li>Los títulos de cada request fueron distintos, conforme al requisito de unicidad.</li>
+<li>La velocidad individual fue aceptable, con tiempos cercanos a 160 ms y p95 cercano a 165 ms.</li>
+<li>El problema principal fue el rechazo masivo: 54,53% de fallos a 50 TPS y 76,78% a 100 TPS.</li>
+<li>Estos resultados siguen estando afectados por las restricciones del servicio público DummyJSON y no representan necesariamente la capacidad de una aplicación propia.</li>
+</ul>
+
+<h2>Recomendaciones</h2>
+<ol>
+<li>Para pruebas de aceptación, usar un entorno controlado o una API que permita registrar productos sin límites restrictivos.</li>
+<li>Confirmar con negocio el volumen máximo real por hora y por minuto, incluyendo el pico de fechas especiales.</li>
+<li>Medir además CPU, memoria, base de datos, cola, errores por código HTTP y autoscaling.</li>
+<li>Repetir las pruebas sin el límite externo, y validar qué sucede cuando el sistema comienza a degradarse.</li>
+</ol>
+
+<div class="foot">
+<b>Interpretación técnica breve:</b> la métrica de duración y el umbral p95 se cumplieron, pero fallaron los umbrales de fallos HTTP y validaciones en ambos ensayos autenticados. Se obtuvieron 3002 requests a 50 TPS (49,67/s) y 5991 a 100 TPS (99,06/s). El login fue exitoso en ambos escenarios y los títulos enviados fueron únicos. Archivos detallados: tests/products-add-load.js, reports/50-tps-auth-summary.json y reports/100-tps-auth-summary.json.
+</div>
+</body></html>

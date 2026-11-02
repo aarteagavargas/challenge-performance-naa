@@ -1,0 +1,6 @@
+# k6 generated summaries and raw output
+reports/*-summary.json
+reports/*-output.txt
+
+# macOS
+.DS_Store
